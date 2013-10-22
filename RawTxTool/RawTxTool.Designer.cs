@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.dgvInputs = new System.Windows.Forms.DataGridView();
 			this.inSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
 			this.inAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -51,8 +51,15 @@
 			this.btnSignPrivkey = new System.Windows.Forms.Button();
 			this.btnSendBlockchain = new System.Windows.Forms.Button();
 			this.btnSendBitcoind = new System.Windows.Forms.Button();
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.exportInputsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.importInputsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			((System.ComponentModel.ISupportInitialize)(this.dgvInputs)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dgvOutputs)).BeginInit();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// dgvInputs
@@ -70,7 +77,7 @@
             this.inValue,
             this.invOut,
             this.inTxId});
-			this.dgvInputs.Location = new System.Drawing.Point(12, 41);
+			this.dgvInputs.Location = new System.Drawing.Point(12, 56);
 			this.dgvInputs.Name = "dgvInputs";
 			this.dgvInputs.RowHeadersVisible = false;
 			this.dgvInputs.Size = new System.Drawing.Size(768, 200);
@@ -95,8 +102,8 @@
 			// inValue
 			// 
 			this.inValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			this.inValue.DefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			this.inValue.DefaultCellStyle = dataGridViewCellStyle6;
 			this.inValue.HeaderText = "Value";
 			this.inValue.Name = "inValue";
 			this.inValue.Width = 59;
@@ -116,7 +123,7 @@
 			// 
 			// btnFromBitcoind
 			// 
-			this.btnFromBitcoind.Location = new System.Drawing.Point(77, 12);
+			this.btnFromBitcoind.Location = new System.Drawing.Point(77, 27);
 			this.btnFromBitcoind.Name = "btnFromBitcoind";
 			this.btnFromBitcoind.Size = new System.Drawing.Size(85, 23);
 			this.btnFromBitcoind.TabIndex = 1;
@@ -127,7 +134,7 @@
 			// lblGetInputs
 			// 
 			this.lblGetInputs.AutoSize = true;
-			this.lblGetInputs.Location = new System.Drawing.Point(12, 17);
+			this.lblGetInputs.Location = new System.Drawing.Point(12, 32);
 			this.lblGetInputs.Name = "lblGetInputs";
 			this.lblGetInputs.Size = new System.Drawing.Size(59, 13);
 			this.lblGetInputs.TabIndex = 2;
@@ -135,7 +142,7 @@
 			// 
 			// btnFromBlockchain
 			// 
-			this.btnFromBlockchain.Location = new System.Drawing.Point(168, 12);
+			this.btnFromBlockchain.Location = new System.Drawing.Point(168, 27);
 			this.btnFromBlockchain.Name = "btnFromBlockchain";
 			this.btnFromBlockchain.Size = new System.Drawing.Size(114, 23);
 			this.btnFromBlockchain.TabIndex = 3;
@@ -147,7 +154,7 @@
 			// 
 			this.txtAddress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.txtAddress.Location = new System.Drawing.Point(288, 14);
+			this.txtAddress.Location = new System.Drawing.Point(288, 29);
 			this.txtAddress.Name = "txtAddress";
 			this.txtAddress.Size = new System.Drawing.Size(411, 20);
 			this.txtAddress.TabIndex = 4;
@@ -157,7 +164,7 @@
 			// btnClear
 			// 
 			this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnClear.Location = new System.Drawing.Point(705, 12);
+			this.btnClear.Location = new System.Drawing.Point(705, 27);
 			this.btnClear.Name = "btnClear";
 			this.btnClear.Size = new System.Drawing.Size(75, 23);
 			this.btnClear.TabIndex = 5;
@@ -175,7 +182,7 @@
 			this.dgvOutputs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.outAddress,
             this.outAmount});
-			this.dgvOutputs.Location = new System.Drawing.Point(12, 247);
+			this.dgvOutputs.Location = new System.Drawing.Point(12, 262);
 			this.dgvOutputs.Name = "dgvOutputs";
 			this.dgvOutputs.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 			this.dgvOutputs.Size = new System.Drawing.Size(768, 200);
@@ -195,7 +202,7 @@
 			// lblTotalIn
 			// 
 			this.lblTotalIn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.lblTotalIn.Location = new System.Drawing.Point(654, 450);
+			this.lblTotalIn.Location = new System.Drawing.Point(654, 471);
 			this.lblTotalIn.Name = "lblTotalIn";
 			this.lblTotalIn.Size = new System.Drawing.Size(126, 26);
 			this.lblTotalIn.TabIndex = 7;
@@ -204,7 +211,7 @@
 			// lblTotalOut
 			// 
 			this.lblTotalOut.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.lblTotalOut.Location = new System.Drawing.Point(654, 476);
+			this.lblTotalOut.Location = new System.Drawing.Point(654, 497);
 			this.lblTotalOut.Name = "lblTotalOut";
 			this.lblTotalOut.Size = new System.Drawing.Size(126, 26);
 			this.lblTotalOut.TabIndex = 8;
@@ -213,7 +220,7 @@
 			// lblChange
 			// 
 			this.lblChange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.lblChange.Location = new System.Drawing.Point(654, 502);
+			this.lblChange.Location = new System.Drawing.Point(654, 523);
 			this.lblChange.Name = "lblChange";
 			this.lblChange.Size = new System.Drawing.Size(126, 26);
 			this.lblChange.TabIndex = 9;
@@ -224,16 +231,16 @@
 			this.txtTx.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.txtTx.Location = new System.Drawing.Point(12, 453);
+			this.txtTx.Location = new System.Drawing.Point(12, 468);
 			this.txtTx.Multiline = true;
 			this.txtTx.Name = "txtTx";
-			this.txtTx.Size = new System.Drawing.Size(636, 200);
+			this.txtTx.Size = new System.Drawing.Size(636, 215);
 			this.txtTx.TabIndex = 10;
 			// 
 			// btnSignBitcoind
 			// 
 			this.btnSignBitcoind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSignBitcoind.Location = new System.Drawing.Point(654, 543);
+			this.btnSignBitcoind.Location = new System.Drawing.Point(654, 573);
 			this.btnSignBitcoind.Name = "btnSignBitcoind";
 			this.btnSignBitcoind.Size = new System.Drawing.Size(126, 23);
 			this.btnSignBitcoind.TabIndex = 11;
@@ -244,7 +251,7 @@
 			// btnSignPrivkey
 			// 
 			this.btnSignPrivkey.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSignPrivkey.Location = new System.Drawing.Point(654, 572);
+			this.btnSignPrivkey.Location = new System.Drawing.Point(654, 602);
 			this.btnSignPrivkey.Name = "btnSignPrivkey";
 			this.btnSignPrivkey.Size = new System.Drawing.Size(126, 23);
 			this.btnSignPrivkey.TabIndex = 12;
@@ -255,7 +262,7 @@
 			// btnSendBlockchain
 			// 
 			this.btnSendBlockchain.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSendBlockchain.Location = new System.Drawing.Point(654, 630);
+			this.btnSendBlockchain.Location = new System.Drawing.Point(654, 660);
 			this.btnSendBlockchain.Name = "btnSendBlockchain";
 			this.btnSendBlockchain.Size = new System.Drawing.Size(126, 23);
 			this.btnSendBlockchain.TabIndex = 13;
@@ -266,7 +273,7 @@
 			// btnSendBitcoind
 			// 
 			this.btnSendBitcoind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSendBitcoind.Location = new System.Drawing.Point(654, 601);
+			this.btnSendBitcoind.Location = new System.Drawing.Point(654, 631);
 			this.btnSendBitcoind.Name = "btnSendBitcoind";
 			this.btnSendBitcoind.Size = new System.Drawing.Size(126, 23);
 			this.btnSendBitcoind.TabIndex = 14;
@@ -274,11 +281,58 @@
 			this.btnSendBitcoind.UseVisualStyleBackColor = true;
 			this.btnSendBitcoind.Click += new System.EventHandler(this.btnSendBitcoind_Click);
 			// 
+			// menuStrip1
+			// 
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem});
+			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+			this.menuStrip1.Name = "menuStrip1";
+			this.menuStrip1.Size = new System.Drawing.Size(792, 24);
+			this.menuStrip1.TabIndex = 15;
+			this.menuStrip1.Text = "menuStrip1";
+			// 
+			// fileToolStripMenuItem
+			// 
+			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportInputsToolStripMenuItem,
+            this.importInputsToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.exitToolStripMenuItem});
+			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+			this.fileToolStripMenuItem.Text = "File";
+			// 
+			// exportInputsToolStripMenuItem
+			// 
+			this.exportInputsToolStripMenuItem.Name = "exportInputsToolStripMenuItem";
+			this.exportInputsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exportInputsToolStripMenuItem.Text = "Export Inputs";
+			this.exportInputsToolStripMenuItem.Click += new System.EventHandler(this.exportInputsToolStripMenuItem_Click);
+			// 
+			// importInputsToolStripMenuItem
+			// 
+			this.importInputsToolStripMenuItem.Name = "importInputsToolStripMenuItem";
+			this.importInputsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.importInputsToolStripMenuItem.Text = "Import Inputs";
+			this.importInputsToolStripMenuItem.Click += new System.EventHandler(this.importInputsToolStripMenuItem_Click);
+			// 
+			// exitToolStripMenuItem
+			// 
+			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exitToolStripMenuItem.Text = "Exit";
+			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+			// 
 			// RawTxTool
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(792, 665);
+			this.ClientSize = new System.Drawing.Size(792, 695);
 			this.Controls.Add(this.btnSendBitcoind);
 			this.Controls.Add(this.btnSendBlockchain);
 			this.Controls.Add(this.btnSignPrivkey);
@@ -294,10 +348,14 @@
 			this.Controls.Add(this.lblGetInputs);
 			this.Controls.Add(this.btnFromBitcoind);
 			this.Controls.Add(this.dgvInputs);
+			this.Controls.Add(this.menuStrip1);
+			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "RawTxTool";
 			this.Text = "Raw Tx Tool";
 			((System.ComponentModel.ISupportInitialize)(this.dgvInputs)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.dgvOutputs)).EndInit();
+			this.menuStrip1.ResumeLayout(false);
+			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -327,6 +385,12 @@
 		private System.Windows.Forms.Button btnSignPrivkey;
 		private System.Windows.Forms.Button btnSendBlockchain;
 		private System.Windows.Forms.Button btnSendBitcoind;
+		private System.Windows.Forms.MenuStrip menuStrip1;
+		private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem exportInputsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem importInputsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 
 
 	}

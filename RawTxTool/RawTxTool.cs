@@ -32,6 +32,10 @@ namespace RawTxTool
 		public RawTxTool()
 		{
 			InitializeComponent();
+			dgvInputs.Columns["inValue"].DefaultCellStyle.Format = "#######0.00000000";
+			inValue.ValueType = typeof(decimal);
+			invOut.ValueType = typeof(UInt32);
+			outAmount.ValueType = typeof(decimal);
 		}
 
 		private bool getRpc()
@@ -82,8 +86,8 @@ namespace RawTxTool
 				
 				dgvInputs.Rows.Add(false, 
 					Address.FromScript(tx.Value.scriptPubKey).ToString(),
-					((decimal)tx.Value.value / (decimal)100000000).ToString("#######0.00000000"),
-					tx.Key.index.ToString(),
+					((decimal)tx.Value.value / (decimal)100000000),
+					tx.Key.index,
 					HexString.FromByteArray(tx.Key.txid));
 
 			}
@@ -170,7 +174,7 @@ namespace RawTxTool
 			{
 				if ((bool)dgvInputs["inSelected", i].Value == true)
 				{
-					UnspentTxOutHeader uth = new UnspentTxOutHeader(HexString.ToByteArray((string)dgvInputs["inTxId", i].Value), Convert.ToUInt32((string)dgvInputs["invOut", i].Value));
+					UnspentTxOutHeader uth = new UnspentTxOutHeader(HexString.ToByteArray((string)dgvInputs["inTxId", i].Value), (UInt32)dgvInputs["invOut", i].Value);
 					selectedUTXO.Add(uth, UTXO[uth]);
 				}
 			}
@@ -327,6 +331,44 @@ namespace RawTxTool
 				MessageBox.Show(brex.Message);
 				return;
 			}
+		}
+
+		private void exportInputsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			SaveFileDialog sfd = new SaveFileDialog();
+			sfd.CheckPathExists = true;
+			sfd.AutoUpgradeEnabled = true;
+			if (sfd.ShowDialog() == DialogResult.Cancel)
+				return;
+			FileStream fs = new FileStream(sfd.FileName, FileMode.OpenOrCreate, FileAccess.Write);
+			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+			{
+				tx.Key.Write(fs);
+				tx.Value.Write(fs);
+			}
+			fs.Close();
+		}
+
+		private void importInputsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog ofd = new OpenFileDialog();
+			ofd.CheckFileExists = true;
+			ofd.AutoUpgradeEnabled = true;
+			if (ofd.ShowDialog() == DialogResult.Cancel)
+				return;
+			FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read);
+			while (fs.Position != fs.Length)
+			{
+				UnspentTxOutHeader txh = UnspentTxOutHeader.FromStream(fs);
+				TxOut txo = TxOut.FromStream(fs);
+				UTXO.Add(txh, txo);
+			}
+			updateUTXOList();
+		}
+
+		private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
 		}
 	}
 }
