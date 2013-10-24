@@ -186,10 +186,9 @@ namespace RawTxTool
 			outputs.Clear();
 			for (int i = 0; i < dgvOutputs.Rows.Count; i++)
 			{
-				decimal amt;
 				if (i != dgvOutputs.Rows.Count - 1)
 				{
-					if (!string.IsNullOrWhiteSpace((string)dgvOutputs["outAddress", i].Value) && decimal.TryParse((string)dgvOutputs["outAmount", i].Value, out amt))
+					if (!string.IsNullOrWhiteSpace((string)dgvOutputs["outAddress", i].Value))
 					{
 						try
 						{
@@ -197,9 +196,9 @@ namespace RawTxTool
 							byte addrType = addr.calcHash();
 							TxOut txo;
 							if (addrType == Address.PUBKEYHASH)
-								txo = new TxOut((UInt64)(amt * 100000000m), ScriptTemplate.PayToAddress(addr).ToBytes());
+								txo = new TxOut((UInt64)((decimal)dgvOutputs["outAmount", i].Value * 100000000m), ScriptTemplate.PayToAddress(addr).ToBytes());
 							else if (addrType == Address.SCRIPTHASH)
-								txo = new TxOut((UInt64)(amt * 100000000m), ScriptTemplate.PayToScriptHash(addr).ToBytes());
+								txo = new TxOut((UInt64)((decimal)dgvOutputs["outAmount", i].Value * 100000000m), ScriptTemplate.PayToScriptHash(addr).ToBytes());
 							else
 								throw new Exception();
 
@@ -340,13 +339,15 @@ namespace RawTxTool
 			sfd.AutoUpgradeEnabled = true;
 			if (sfd.ShowDialog() == DialogResult.Cancel)
 				return;
-			FileStream fs = new FileStream(sfd.FileName, FileMode.OpenOrCreate, FileAccess.Write);
-			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+			using (FileStream fs = new FileStream(sfd.FileName, FileMode.OpenOrCreate, FileAccess.Write))
 			{
-				tx.Key.Write(fs);
-				tx.Value.Write(fs);
+				foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+				{
+					tx.Key.Write(fs);
+					tx.Value.Write(fs);
+				}
+				fs.Close();
 			}
-			fs.Close();
 		}
 
 		private void importInputsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -356,12 +357,15 @@ namespace RawTxTool
 			ofd.AutoUpgradeEnabled = true;
 			if (ofd.ShowDialog() == DialogResult.Cancel)
 				return;
-			FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read);
-			while (fs.Position != fs.Length)
+			using (FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read))
 			{
-				UnspentTxOutHeader txh = UnspentTxOutHeader.FromStream(fs);
-				TxOut txo = TxOut.FromStream(fs);
-				UTXO.Add(txh, txo);
+				while (fs.Position != fs.Length)
+				{
+					UnspentTxOutHeader txh = UnspentTxOutHeader.FromStream(fs);
+					TxOut txo = TxOut.FromStream(fs);
+					UTXO.Add(txh, txo);
+				}
+				fs.Close();
 			}
 			updateUTXOList();
 		}
