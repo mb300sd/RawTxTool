@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Bitcoin_Tool.Structs.Other;
-using System.Collections.ObjectModel;
+﻿using Bitcoin_Tool.Crypto;
 using Bitcoin_Tool.DataConverters;
-using Bitcoin_Tool.Crypto;
+using Bitcoin_Tool.RPC;
 using Bitcoin_Tool.Scripts;
 using Bitcoin_Tool.Structs;
-using System.Net;
+using Bitcoin_Tool.Structs.Other;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Drawing;
 using System.IO;
-using Bitcoin_Tool.RPC;
+using System.Net;
+using System.Text;
 using System.Web.Script.Serialization;
-using System.Collections;
+using System.Windows.Forms;
 
 namespace RawTxTool
 {
@@ -174,6 +169,7 @@ namespace RawTxTool
 		{
 			if (disableUpdate) return;
 
+			disableUpdate = true;
 			selectedUTXO.Clear();
 			for (int i = 0; i < dgvInputs.Rows.Count; i++)
 			{
@@ -184,12 +180,14 @@ namespace RawTxTool
 				}
 			}
 			updateTx();
+			disableUpdate = false;
 		}
 
 		private void dgvOutputs_Changed(object sender, EventArgs e)
 		{
 			if (disableUpdate) return;
 
+			disableUpdate = true;
 			outputs.Clear();
 			for (int i = 0; i < dgvOutputs.Rows.Count; i++)
 			{
@@ -225,6 +223,7 @@ namespace RawTxTool
 				}
 			}
 			updateTx();
+			disableUpdate = false;
 		}
 
 		private void updateTx(bool changeText = true)
@@ -309,7 +308,7 @@ namespace RawTxTool
 		private void btnSendBlockchain_Click(object sender, EventArgs e)
 		{
 			WebClient wc = new WebClient();
-			System.Collections.Specialized.NameValueCollection nvc = new System.Collections.Specialized.NameValueCollection();
+			NameValueCollection nvc = new NameValueCollection();
 			nvc.Add("tx", txtTx.Text);
 			string response;
 			try
@@ -439,12 +438,16 @@ namespace RawTxTool
 
 		private void txtTx_TextChanged(object sender, EventArgs e)
 		{
+			if (disableUpdate) return;
+
 			try
 			{
 				Transaction tx = new Transaction(HexString.ToByteArray(txtTx.Text));
 
+				// Disable *_Changed events
 				disableUpdate = true;
 
+				// Clear everything
 				UTXO.Clear();
 				updateUTXOList();
 				selectedUTXO.Clear();
@@ -455,6 +458,8 @@ namespace RawTxTool
 				{
 					UnspentTxOutHeader txh;
 					TxOut txo;
+
+					// Try local bitcoind first
 					if (rpc != null)
 					{
 						try
@@ -471,6 +476,8 @@ namespace RawTxTool
 						{
 						}
 					}
+
+					// Get from blockchain if bitcoind fails
 					try
 					{
 						string json;
@@ -510,12 +517,22 @@ namespace RawTxTool
 				}
 				foreach (TxOut txout in tx.outputs)
 				{
-					dgvOutputs.Rows.Add(Address.FromScript(txout.scriptPubKey).ToString(), (decimal)txout.value / 100000000m);
+					string addr;
+					try
+					{
+						addr = Address.FromScript(txout.scriptPubKey).ToString();
+					}
+					catch (Exception)
+					{
+						addr = "Could not decode address";
+					}
+					dgvOutputs.Rows.Add(addr, (decimal)txout.value / 100000000m);
 					outputs.Add(txout);
 				}
 				updateTx(false);
 				txtTx.ForeColor = SystemColors.WindowText;
 			}
+			// Transaction invalid
 			catch (Exception)
 			{
 				txtTx.ForeColor = Color.Red;
