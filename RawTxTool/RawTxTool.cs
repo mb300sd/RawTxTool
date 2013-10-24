@@ -23,6 +23,8 @@ namespace RawTxTool
 {
 	public partial class RawTxTool : Form
 	{
+		bool disableUpdate = false;
+
 		Dictionary<UnspentTxOutHeader, TxOut> UTXO = new Dictionary<UnspentTxOutHeader, TxOut>();
 		Dictionary<UnspentTxOutHeader, TxOut> selectedUTXO = new Dictionary<UnspentTxOutHeader, TxOut>();
 		List<TxOut> outputs = new List<TxOut>();
@@ -78,18 +80,33 @@ namespace RawTxTool
 			return true;
 		}
 
-		private void updateUTXOList() {
-			dgvInputs.Rows.Clear();
+		private void btnFromBitcoind_Click(object sender, EventArgs e)
+		{
+			if (!getRpc())
+				return;
 
-			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+			try
 			{
-				
-				dgvInputs.Rows.Add(false, 
-					Address.FromScript(tx.Value.scriptPubKey).ToString(),
-					((decimal)tx.Value.value / (decimal)100000000),
-					tx.Key.index,
-					HexString.FromByteArray(tx.Key.txid));
+				object[] obj = rpc.doRequest<object[]>("listunspent", new object[0]);
 
+				for (int i = 0; i < obj.Length; i++)
+				{
+					Dictionary<string, object> p = rpc.jss.ConvertToType<Dictionary<string, object>>(obj[i]);
+
+					string txid = (string)p["txid"];
+					int vout = (int)p["vout"];
+					ulong amount = (ulong)(((decimal)p["amount"]) * 100000000m);
+					string scriptPubKey = (string)p["scriptPubKey"];
+
+					UTXO.Add(new UnspentTxOutHeader(HexString.ToByteArrayReversed(txid), (uint)vout), new TxOut(amount, HexString.ToByteArray(scriptPubKey)));
+				}
+
+				updateUTXOList();
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Error downloading unspent outputs.");
+				return;
 			}
 		}
 
@@ -121,6 +138,22 @@ namespace RawTxTool
 			}
 		}
 
+		private void updateUTXOList()
+		{
+			dgvInputs.Rows.Clear();
+
+			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+			{
+
+				dgvInputs.Rows.Add(false,
+					Address.FromScript(tx.Value.scriptPubKey).ToString(),
+					((decimal)tx.Value.value / (decimal)100000000),
+					tx.Key.index,
+					HexString.FromByteArrayReversed(tx.Key.txid));
+
+			}
+		}
+
 		private void txtAddress_Enter(object sender, EventArgs e)
 		{
 			if (txtAddress.Text == "Bitcoin Address")
@@ -132,47 +165,21 @@ namespace RawTxTool
 			UTXO.Clear();
 			updateUTXOList();
 			selectedUTXO.Clear();
+			dgvOutputs.Rows.Clear();
+			outputs.Clear();
 			updateTx();
-		}
-
-		private void btnFromBitcoind_Click(object sender, EventArgs e)
-		{
-			if (!getRpc())
-				return;
-
-			try
-			{
-				object[] obj = rpc.doRequest<object[]>("listunspent", new object[0]);
-
-				for (int i = 0; i < obj.Length; i++)
-				{
-					Dictionary<string, object> p = rpc.jss.ConvertToType<Dictionary<string, object>>(obj[i]);
-
-					string txid = (string)p["txid"];
-					int vout = (int)p["vout"];
-					ulong amount = (ulong)(((decimal)p["amount"]) * 100000000m);
-					string scriptPubKey = (string)p["scriptPubKey"];
-
-					UTXO.Add(new UnspentTxOutHeader(HexString.ToByteArray(txid), (uint)vout), new TxOut(amount, HexString.ToByteArray(scriptPubKey)));
-				}
-
-				updateUTXOList();
-			}
-			catch (Exception)
-			{
-				MessageBox.Show("Error downloading unspent outputs.");
-				return;
-			}
 		}
 
 		private void dgvInputs_CellValueChanged(object sender, DataGridViewCellEventArgs e)
 		{
+			if (disableUpdate) return;
+
 			selectedUTXO.Clear();
 			for (int i = 0; i < dgvInputs.Rows.Count; i++)
 			{
 				if ((bool)dgvInputs["inSelected", i].Value == true)
 				{
-					UnspentTxOutHeader uth = new UnspentTxOutHeader(HexString.ToByteArray((string)dgvInputs["inTxId", i].Value), (UInt32)dgvInputs["invOut", i].Value);
+					UnspentTxOutHeader uth = new UnspentTxOutHeader(HexString.ToByteArrayReversed((string)dgvInputs["inTxId", i].Value), (UInt32)dgvInputs["invOut", i].Value);
 					selectedUTXO.Add(uth, UTXO[uth]);
 				}
 			}
@@ -181,6 +188,8 @@ namespace RawTxTool
 
 		private void dgvOutputs_Changed(object sender, EventArgs e)
 		{
+			if (disableUpdate) return;
+
 			outputs.Clear();
 			for (int i = 0; i < dgvOutputs.Rows.Count; i++)
 			{
@@ -229,7 +238,7 @@ namespace RawTxTool
 			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> input in selectedUTXO)
 			{
 				totalInput += input.Value.value;
-				txin.Add(new TxIn(HexString.ToByteArray(HexString.FromByteArrayReversed(input.Key.txid)), input.Key.index, new byte[0]));
+				txin.Add(new TxIn(input.Key.txid, input.Key.index, new byte[0]));
 			}
 			totalInput /= 100000000;
 
@@ -402,79 +411,6 @@ namespace RawTxTool
 					r.Cells["inSelected"].Value = !(bool)r.Cells["inSelected"].Value;
 		}
 
-		private void txtTx_TextChanged(object sender, EventArgs e)
-		{
-			if (!txtTx.Focused)
-				return;
-			try
-			{
-				Transaction tx = new Transaction(HexString.ToByteArray(txtTx.Text));
-
-				btnClear_Click(null, null);
-
-				foreach (TxIn txin in tx.inputs)
-				{
-					if (rpc != null)
-					{
-						try
-						{
-							string sPrevTx = rpc.doRequest<string>("getrawtransaction", new object[] { HexString.FromByteArray(txin.prevOut) });
-							Transaction prevTx = new Transaction(HexString.ToByteArray(sPrevTx));
-							UTXO.Add(new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex), prevTx.outputs[txin.prevOutIndex]);
-							continue;
-						}
-						catch (Exception)
-						{ 
-						}
-					}
-					try
-					{
-						WebClient wc = new WebClient();
-						string json = wc.DownloadString("https://blockchain.info/rawtx/" + HexString.FromByteArrayReversed(txin.prevOut));
-						JavaScriptSerializer jss = new JavaScriptSerializer();
-						Dictionary<string, object> jso = jss.Deserialize<Dictionary<string, object>>(json);
-						Dictionary<string, object>[] outputs = jss.ConvertToType<Dictionary<string, object>[]>(jso["out"]);
-						Address addr = new Address((string)outputs[txin.prevOutIndex]["addr"]);
-						byte[] scriptPubKey = null;
-						if (addr.calcHash() == Address.PUBKEYHASH) 
-						{
-							scriptPubKey = ScriptTemplate.PayToAddress(addr).ToBytes();
-
-						}
-						else if (addr.calcHash() == Address.SCRIPTHASH)
-						{
-							scriptPubKey = ScriptTemplate.PayToScriptHash(addr).ToBytes();
-						}
-						UnspentTxOutHeader txh = new UnspentTxOutHeader(HexString.ToByteArray(HexString.FromByteArrayReversed(txin.prevOut)), txin.prevOutIndex);
-						TxOut txo = new TxOut(jss.ConvertToType<UInt64>(outputs[txin.prevOutIndex]["value"]), scriptPubKey); 
-						UTXO.Add(txh, txo);
-						selectedUTXO.Add(txh, txo);
-					}
-					catch (Exception)
-					{
-						MessageBox.Show("Could not get input data.");
-						return;
-					}
-				}
-				updateUTXOList();
-				foreach (DataGridViewRow row in dgvInputs.Rows)
-				{
-					row.Cells["inSelected"].Value = true;
-				}
-				foreach (TxOut txout in tx.outputs)
-				{
-					dgvOutputs.Rows.Add(Address.FromScript(txout.scriptPubKey).ToString(), (decimal)txout.value / 1000000m);
-				}
-				updateTx(false);
-				txtTx.ForeColor = SystemColors.WindowText;
-			}
-			catch (Exception)
-			{
-				txtTx.ForeColor = Color.Red;
-				return;
-			}
-		}
-
 		private void copyAddressToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			if (dgvInputs.SelectedRows.Count > 0)
@@ -501,5 +437,94 @@ namespace RawTxTool
 			}
 		}
 
+		private void txtTx_TextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Transaction tx = new Transaction(HexString.ToByteArray(txtTx.Text));
+
+				disableUpdate = true;
+
+				UTXO.Clear();
+				updateUTXOList();
+				selectedUTXO.Clear();
+				dgvOutputs.Rows.Clear();
+				outputs.Clear();
+
+				foreach (TxIn txin in tx.inputs)
+				{
+					UnspentTxOutHeader txh;
+					TxOut txo;
+					if (rpc != null)
+					{
+						try
+						{
+							string sPrevTx = rpc.doRequest<string>("getrawtransaction", new object[] { HexString.FromByteArrayReversed(txin.prevOut) });
+							Transaction prevTx = new Transaction(HexString.ToByteArray(sPrevTx));
+							txh = new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex);
+							txo = prevTx.outputs[txin.prevOutIndex];
+							UTXO.Add(txh, txo);
+							selectedUTXO.Add(txh, txo);
+							continue;
+						}
+						catch (Exception)
+						{
+						}
+					}
+					try
+					{
+						string json;
+						using (WebClient wc = new WebClient())
+						{
+							json = wc.DownloadString("https://blockchain.info/rawtx/" + HexString.FromByteArrayReversed(txin.prevOut));
+						}
+						JavaScriptSerializer jss = new JavaScriptSerializer();
+						Dictionary<string, object> jso = jss.Deserialize<Dictionary<string, object>>(json);
+						Dictionary<string, object>[] outs = jss.ConvertToType<Dictionary<string, object>[]>(jso["out"]);
+						Address addr = new Address((string)outs[txin.prevOutIndex]["addr"]);
+						byte[] scriptPubKey = null;
+						if (addr.calcHash() == Address.PUBKEYHASH)
+						{
+							scriptPubKey = ScriptTemplate.PayToAddress(addr).ToBytes();
+
+						}
+						else if (addr.calcHash() == Address.SCRIPTHASH)
+						{
+							scriptPubKey = ScriptTemplate.PayToScriptHash(addr).ToBytes();
+						}
+						txh = new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex);
+						txo = new TxOut(jss.ConvertToType<UInt64>(outs[txin.prevOutIndex]["value"]), scriptPubKey);
+						UTXO.Add(txh, txo);
+						selectedUTXO.Add(txh, txo);
+					}
+					catch (Exception)
+					{
+						MessageBox.Show("Could not get input data.");
+						return;
+					}
+				}
+				updateUTXOList();
+				foreach (DataGridViewRow row in dgvInputs.Rows)
+				{
+					row.Cells["inSelected"].Value = true;
+				}
+				foreach (TxOut txout in tx.outputs)
+				{
+					dgvOutputs.Rows.Add(Address.FromScript(txout.scriptPubKey).ToString(), (decimal)txout.value / 100000000m);
+					outputs.Add(txout);
+				}
+				updateTx(false);
+				txtTx.ForeColor = SystemColors.WindowText;
+			}
+			catch (Exception)
+			{
+				txtTx.ForeColor = Color.Red;
+				return;
+			}
+			finally
+			{
+				disableUpdate = false;
+			}
+		}
 	}
 }

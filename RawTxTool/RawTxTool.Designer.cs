@@ -91,7 +91,7 @@
 			this.dgvInputs.Name = "dgvInputs";
 			this.dgvInputs.RowHeadersVisible = false;
 			this.dgvInputs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dgvInputs.Size = new System.Drawing.Size(754, 186);
+			this.dgvInputs.Size = new System.Drawing.Size(754, 192);
 			this.dgvInputs.TabIndex = 0;
 			this.dgvInputs.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInputs_CellValueChanged);
 			this.dgvInputs.CurrentCellDirtyStateChanged += new System.EventHandler(this.dgvInputs_CurrentCellDirtyStateChanged);
@@ -233,11 +233,11 @@
             this.outAmount});
 			this.tableLayoutPanel1.SetColumnSpan(this.dgvOutputs, 2);
 			this.dgvOutputs.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dgvOutputs.Location = new System.Drawing.Point(3, 195);
+			this.dgvOutputs.Location = new System.Drawing.Point(3, 201);
 			this.dgvOutputs.Name = "dgvOutputs";
 			this.dgvOutputs.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 			this.dgvOutputs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dgvOutputs.Size = new System.Drawing.Size(754, 186);
+			this.dgvOutputs.Size = new System.Drawing.Size(754, 191);
 			this.dgvOutputs.TabIndex = 1;
 			this.dgvOutputs.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvOutputs_Changed);
 			this.dgvOutputs.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgvOutputs_DataError);
@@ -275,10 +275,10 @@
 			// txtTx
 			// 
 			this.txtTx.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.txtTx.Location = new System.Drawing.Point(3, 387);
+			this.txtTx.Location = new System.Drawing.Point(3, 398);
 			this.txtTx.Multiline = true;
 			this.txtTx.Name = "txtTx";
-			this.txtTx.Size = new System.Drawing.Size(625, 188);
+			this.txtTx.Size = new System.Drawing.Size(625, 193);
 			this.txtTx.TabIndex = 2;
 			this.txtTx.TextChanged += new System.EventHandler(this.txtTx_TextChanged);
 			this.txtTx.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtTx_KeyDown);
@@ -392,7 +392,7 @@
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33533F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33233F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33233F));
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(760, 578);
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(760, 594);
 			this.tableLayoutPanel1.TabIndex = 16;
 			// 
 			// flowLayoutPanel1
@@ -406,10 +406,10 @@
 			this.flowLayoutPanel1.Controls.Add(this.btnSendBlockchain);
 			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-			this.flowLayoutPanel1.Location = new System.Drawing.Point(631, 384);
+			this.flowLayoutPanel1.Location = new System.Drawing.Point(631, 395);
 			this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
 			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-			this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 194);
+			this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 199);
 			this.flowLayoutPanel1.TabIndex = 11;
 			// 
 			// lblTotalIn
@@ -425,7 +425,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(784, 646);
+			this.ClientSize = new System.Drawing.Size(784, 662);
 			this.Controls.Add(this.tableLayoutPanel1);
 			this.Controls.Add(this.btnClear);
 			this.Controls.Add(this.txtAddress);
@@ -434,7 +434,7 @@
 			this.Controls.Add(this.btnFromBitcoind);
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
-			this.MinimumSize = new System.Drawing.Size(800, 684);
+			this.MinimumSize = new System.Drawing.Size(800, 700);
 			this.Name = "RawTxTool";
 			this.Text = "Raw Tx Tool";
 			((System.ComponentModel.ISupportInitialize)(this.dgvInputs)).EndInit();
