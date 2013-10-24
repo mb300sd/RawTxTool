@@ -181,7 +181,7 @@ namespace RawTxTool
 			updateTx();
 		}
 
-		private void dgvOutputs_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+		private void dgvOutputs_Changed(object sender, EventArgs e)
 		{
 			outputs.Clear();
 			for (int i = 0; i < dgvOutputs.Rows.Count; i++)
@@ -374,5 +374,67 @@ namespace RawTxTool
 		{
 			this.Close();
 		}
+
+		private void dgvInputs_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+		{
+			if (dgvInputs.IsCurrentCellDirty)
+			{
+				dgvInputs.CommitEdit(DataGridViewDataErrorContexts.Commit);
+			}
+		}
+
+		private void dgvOutputs_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Delete && dgvOutputs.CurrentRow != dgvOutputs.Rows[dgvOutputs.Rows.Count - 1])
+			{
+				dgvOutputs.Rows.Remove(dgvOutputs.CurrentRow);
+			}
+		}
+
+		private void dgvOutputs_DataError(object sender, DataGridViewDataErrorEventArgs e)
+		{
+			dgvOutputs.CancelEdit();
+		}
+
+		private void dgvInputs_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Space)
+				foreach (DataGridViewRow r in dgvInputs.SelectedRows)
+					r.Cells["inSelected"].Value = !(bool)r.Cells["inSelected"].Value;
+		}
+
+		private void txtTx_TextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Transaction tx = new Transaction(HexString.ToByteArray(txtTx.Text));
+
+				txtTx.ForeColor = SystemColors.WindowText;
+			}
+			catch (Exception)
+			{
+				txtTx.ForeColor = Color.Red;
+				return;
+			}
+		}
+
+		private void copyAddressToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (dgvInputs.SelectedRows.Count > 0)
+				Clipboard.SetText((string)dgvInputs.SelectedRows[0].Cells["inAddress"].Value);
+		}
+
+		private void copyTxIdToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (dgvInputs.SelectedRows.Count > 0)
+				Clipboard.SetText((string)dgvInputs.SelectedRows[0].Cells["inTxId"].Value);
+		}
+
+		private void copyValueToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (dgvInputs.SelectedRows.Count > 0)
+				Clipboard.SetText(((decimal)dgvInputs.SelectedRows[0].Cells["inValue"].Value).ToString("#######0.00000000"));
+		}
+
 	}
 }
