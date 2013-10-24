@@ -34,6 +34,7 @@
 			this.inSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.copyAddressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.copyValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.copyTxIdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.inAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.inValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -63,7 +64,6 @@
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
 			this.lblTotalIn = new System.Windows.Forms.Label();
-			this.copyValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.dgvInputs)).BeginInit();
 			this.contextMenuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvOutputs)).BeginInit();
@@ -112,19 +112,26 @@
             this.copyValueToolStripMenuItem,
             this.copyTxIdToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(153, 92);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(148, 70);
 			// 
 			// copyAddressToolStripMenuItem
 			// 
 			this.copyAddressToolStripMenuItem.Name = "copyAddressToolStripMenuItem";
-			this.copyAddressToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.copyAddressToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.copyAddressToolStripMenuItem.Text = "Copy Address";
 			this.copyAddressToolStripMenuItem.Click += new System.EventHandler(this.copyAddressToolStripMenuItem_Click);
+			// 
+			// copyValueToolStripMenuItem
+			// 
+			this.copyValueToolStripMenuItem.Name = "copyValueToolStripMenuItem";
+			this.copyValueToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+			this.copyValueToolStripMenuItem.Text = "Copy Value";
+			this.copyValueToolStripMenuItem.Click += new System.EventHandler(this.copyValueToolStripMenuItem_Click);
 			// 
 			// copyTxIdToolStripMenuItem
 			// 
 			this.copyTxIdToolStripMenuItem.Name = "copyTxIdToolStripMenuItem";
-			this.copyTxIdToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.copyTxIdToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
 			this.copyTxIdToolStripMenuItem.Text = "Copy TxId";
 			this.copyTxIdToolStripMenuItem.Click += new System.EventHandler(this.copyTxIdToolStripMenuItem_Click);
 			// 
@@ -271,9 +278,10 @@
 			this.txtTx.Location = new System.Drawing.Point(3, 387);
 			this.txtTx.Multiline = true;
 			this.txtTx.Name = "txtTx";
-			this.txtTx.Size = new System.Drawing.Size(622, 188);
+			this.txtTx.Size = new System.Drawing.Size(625, 188);
 			this.txtTx.TabIndex = 2;
 			this.txtTx.TextChanged += new System.EventHandler(this.txtTx_TextChanged);
+			this.txtTx.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtTx_KeyDown);
 			// 
 			// btnSignBitcoind
 			// 
@@ -373,7 +381,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.tableLayoutPanel1.ColumnCount = 2;
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 132F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 129F));
 			this.tableLayoutPanel1.Controls.Add(this.dgvInputs, 0, 0);
 			this.tableLayoutPanel1.Controls.Add(this.txtTx, 0, 2);
 			this.tableLayoutPanel1.Controls.Add(this.dgvOutputs, 0, 1);
@@ -398,10 +406,10 @@
 			this.flowLayoutPanel1.Controls.Add(this.btnSendBlockchain);
 			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-			this.flowLayoutPanel1.Location = new System.Drawing.Point(628, 384);
+			this.flowLayoutPanel1.Location = new System.Drawing.Point(631, 384);
 			this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
 			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-			this.flowLayoutPanel1.Size = new System.Drawing.Size(132, 194);
+			this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 194);
 			this.flowLayoutPanel1.TabIndex = 11;
 			// 
 			// lblTotalIn
@@ -412,13 +420,6 @@
 			this.lblTotalIn.Size = new System.Drawing.Size(126, 26);
 			this.lblTotalIn.TabIndex = 0;
 			this.lblTotalIn.Text = "Total Inputs:\r\n0";
-			// 
-			// copyValueToolStripMenuItem
-			// 
-			this.copyValueToolStripMenuItem.Name = "copyValueToolStripMenuItem";
-			this.copyValueToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.copyValueToolStripMenuItem.Text = "Copy Value";
-			this.copyValueToolStripMenuItem.Click += new System.EventHandler(this.copyValueToolStripMenuItem_Click);
 			// 
 			// RawTxTool
 			// 

@@ -94,23 +94,21 @@ namespace RawTxTool
 		}
 
 		private void btnFromBlockchain_Click(object sender, EventArgs e)
-		{
-			WebClient wc = new WebClient();
-			string json = wc.DownloadString("http://blockchain.info/unspent?active=" + txtAddress.Text);
-
-			JavaScriptSerializer jss = new JavaScriptSerializer();
-			Dictionary<string, object> o;
+		{	
 			try 
 			{
-				o = (Dictionary<string, object>)jss.DeserializeObject(json);
-				for (int i = 0; i < ((object[])o["unspent_outputs"]).Length; i++)
-				{
-					Dictionary<string, object> p = (Dictionary<string, object>)(((object[])o["unspent_outputs"])[i]);
+				WebClient wc = new WebClient();
+				string json = wc.DownloadString("http://blockchain.info/unspent?active=" + txtAddress.Text);
+				JavaScriptSerializer jss = new JavaScriptSerializer();
 
-					string tx_hash = (string)p["tx_hash"];
-					int tx_output_n = (int)p["tx_output_n"];
-					ulong value = Convert.ToUInt64((string)p["value_hex"], 16);
-					string script = (string)p["script"];
+				Dictionary<string, object> jso = jss.Deserialize<Dictionary<string, object>>(json);
+				Dictionary<string, object>[] outputs = jss.ConvertToType<Dictionary<string, object>[]>(jso["unspent_outputs"]);
+				foreach (Dictionary<string, object> txo in outputs)
+				{
+					string tx_hash = (string)txo["tx_hash"];
+					int tx_output_n = (int)txo["tx_output_n"];
+					ulong value = Convert.ToUInt64((string)txo["value_hex"], 16);
+					string script = (string)txo["script"];
 
 					UTXO.Add(new UnspentTxOutHeader(HexString.ToByteArray(tx_hash), (uint)tx_output_n), new TxOut(value, HexString.ToByteArray(script)));
 				}
@@ -220,7 +218,7 @@ namespace RawTxTool
 			updateTx();
 		}
 
-		private void updateTx()
+		private void updateTx(bool changeText = true)
 		{
 			decimal totalInput = 0;
 			decimal totalOutput = 0;
@@ -248,7 +246,8 @@ namespace RawTxTool
 			lblChange.Text = "Change:\n" + change;
 
 			Transaction tx = new Transaction(1, txin.ToArray(), outputs.ToArray(), 0);
-			txtTx.Text = HexString.FromByteArray(tx.ToBytes());
+			if (changeText)
+				txtTx.Text = HexString.FromByteArray(tx.ToBytes());
 		}
 
 		private void btnSignBitcoind_Click(object sender, EventArgs e)
@@ -405,10 +404,68 @@ namespace RawTxTool
 
 		private void txtTx_TextChanged(object sender, EventArgs e)
 		{
+			if (!txtTx.Focused)
+				return;
 			try
 			{
 				Transaction tx = new Transaction(HexString.ToByteArray(txtTx.Text));
 
+				btnClear_Click(null, null);
+
+				foreach (TxIn txin in tx.inputs)
+				{
+					if (rpc != null)
+					{
+						try
+						{
+							string sPrevTx = rpc.doRequest<string>("getrawtransaction", new object[] { HexString.FromByteArray(txin.prevOut) });
+							Transaction prevTx = new Transaction(HexString.ToByteArray(sPrevTx));
+							UTXO.Add(new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex), prevTx.outputs[txin.prevOutIndex]);
+							continue;
+						}
+						catch (Exception)
+						{ 
+						}
+					}
+					try
+					{
+						WebClient wc = new WebClient();
+						string json = wc.DownloadString("https://blockchain.info/rawtx/" + HexString.FromByteArrayReversed(txin.prevOut));
+						JavaScriptSerializer jss = new JavaScriptSerializer();
+						Dictionary<string, object> jso = jss.Deserialize<Dictionary<string, object>>(json);
+						Dictionary<string, object>[] outputs = jss.ConvertToType<Dictionary<string, object>[]>(jso["out"]);
+						Address addr = new Address((string)outputs[txin.prevOutIndex]["addr"]);
+						byte[] scriptPubKey = null;
+						if (addr.calcHash() == Address.PUBKEYHASH) 
+						{
+							scriptPubKey = ScriptTemplate.PayToAddress(addr).ToBytes();
+
+						}
+						else if (addr.calcHash() == Address.SCRIPTHASH)
+						{
+							scriptPubKey = ScriptTemplate.PayToScriptHash(addr).ToBytes();
+						}
+						UnspentTxOutHeader txh = new UnspentTxOutHeader(HexString.ToByteArray(HexString.FromByteArrayReversed(txin.prevOut)), txin.prevOutIndex);
+						TxOut txo = new TxOut(jss.ConvertToType<UInt64>(outputs[txin.prevOutIndex]["value"]), scriptPubKey); 
+						UTXO.Add(txh, txo);
+						selectedUTXO.Add(txh, txo);
+					}
+					catch (Exception)
+					{
+						MessageBox.Show("Could not get input data.");
+						return;
+					}
+				}
+				updateUTXOList();
+				foreach (DataGridViewRow row in dgvInputs.Rows)
+				{
+					row.Cells["inSelected"].Value = true;
+				}
+				foreach (TxOut txout in tx.outputs)
+				{
+					dgvOutputs.Rows.Add(Address.FromScript(txout.scriptPubKey).ToString(), (decimal)txout.value / 1000000m);
+				}
+				updateTx(false);
 				txtTx.ForeColor = SystemColors.WindowText;
 			}
 			catch (Exception)
@@ -434,6 +491,14 @@ namespace RawTxTool
 		{
 			if (dgvInputs.SelectedRows.Count > 0)
 				Clipboard.SetText(((decimal)dgvInputs.SelectedRows[0].Cells["inValue"].Value).ToString("#######0.00000000"));
+		}
+
+		private void txtTx_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Modifiers == Keys.Control && e.KeyCode == Keys.A)
+			{
+				txtTx.SelectAll();
+			}
 		}
 
 	}
