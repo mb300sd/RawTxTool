@@ -198,15 +198,9 @@ namespace RawTxTool
 						try
 						{
 							Address addr = new Address((string)dgvOutputs["outAddress", i].Value);
-							byte addrType = addr.calcHash();
-							TxOut txo;
-							if (addrType == Address.PUBKEYHASH)
-								txo = new TxOut((UInt64)((decimal)dgvOutputs["outAmount", i].Value * 100000000m), ScriptTemplate.PayToAddress(addr).ToBytes());
-							else if (addrType == Address.SCRIPTHASH)
-								txo = new TxOut((UInt64)((decimal)dgvOutputs["outAmount", i].Value * 100000000m), ScriptTemplate.PayToScriptHash(addr).ToBytes());
-							else
-								throw new Exception();
-
+							
+							TxOut txo = new TxOut((UInt64)((decimal)dgvOutputs["outAmount", i].Value * 100000000m), ScriptTemplate.PayToAddress(addr).ToBytes());
+							
 							outputs.Add(txo);
 
 							dgvOutputs.Rows[i].ErrorText = "";
@@ -489,16 +483,7 @@ namespace RawTxTool
 						Dictionary<string, object> jso = jss.Deserialize<Dictionary<string, object>>(json);
 						Dictionary<string, object>[] outs = jss.ConvertToType<Dictionary<string, object>[]>(jso["out"]);
 						Address addr = new Address((string)outs[txin.prevOutIndex]["addr"]);
-						byte[] scriptPubKey = null;
-						if (addr.calcHash() == Address.PUBKEYHASH)
-						{
-							scriptPubKey = ScriptTemplate.PayToAddress(addr).ToBytes();
-
-						}
-						else if (addr.calcHash() == Address.SCRIPTHASH)
-						{
-							scriptPubKey = ScriptTemplate.PayToScriptHash(addr).ToBytes();
-						}
+						byte[] scriptPubKey = scriptPubKey = ScriptTemplate.PayToAddress(addr).ToBytes();
 						txh = new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex);
 						txo = new TxOut(jss.ConvertToType<UInt64>(outs[txin.prevOutIndex]["value"]), scriptPubKey);
 						UTXO.Add(txh, txo);
