@@ -20,8 +20,8 @@ namespace RawTxTool
 	{
 		bool disableUpdate = false;
 
-		Dictionary<UnspentTxOutHeader, TxOut> UTXO = new Dictionary<UnspentTxOutHeader, TxOut>();
-		Dictionary<UnspentTxOutHeader, TxOut> selectedUTXO = new Dictionary<UnspentTxOutHeader, TxOut>();
+		Dictionary<TxOutId, TxOut> UTXO = new Dictionary<TxOutId, TxOut>();
+		Dictionary<TxOutId, TxOut> selectedUTXO = new Dictionary<TxOutId, TxOut>();
 		List<TxOut> outputs = new List<TxOut>();
 
 		BitcoinRPC rpc = null;
@@ -93,7 +93,7 @@ namespace RawTxTool
 					ulong amount = (ulong)(((decimal)p["amount"]) * 100000000m);
 					string scriptPubKey = (string)p["scriptPubKey"];
 
-					UTXO.Add(new UnspentTxOutHeader(HexString.ToByteArrayReversed(txid), (uint)vout), new TxOut(amount, HexString.ToByteArray(scriptPubKey)));
+					UTXO.Add(new TxOutId(HexString.ToByteArrayReversed(txid), (uint)vout), new TxOut(amount, HexString.ToByteArray(scriptPubKey)));
 				}
 
 				updateUTXOList();
@@ -122,7 +122,7 @@ namespace RawTxTool
 					ulong value = Convert.ToUInt64((string)txo["value_hex"], 16);
 					string script = (string)txo["script"];
 
-					UTXO.Add(new UnspentTxOutHeader(HexString.ToByteArray(tx_hash), (uint)tx_output_n), new TxOut(value, HexString.ToByteArray(script)));
+					UTXO.Add(new TxOutId(HexString.ToByteArray(tx_hash), (uint)tx_output_n), new TxOut(value, HexString.ToByteArray(script)));
 				}
 				updateUTXOList();
 			}
@@ -137,7 +137,7 @@ namespace RawTxTool
 		{
 			dgvInputs.Rows.Clear();
 
-			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+			foreach (KeyValuePair<TxOutId, TxOut> tx in UTXO)
 			{
 
 				dgvInputs.Rows.Add(false,
@@ -175,7 +175,7 @@ namespace RawTxTool
 			{
 				if ((bool)dgvInputs["inSelected", i].Value == true)
 				{
-					UnspentTxOutHeader uth = new UnspentTxOutHeader(HexString.ToByteArrayReversed((string)dgvInputs["inTxId", i].Value), (UInt32)dgvInputs["invOut", i].Value);
+					TxOutId uth = new TxOutId(HexString.ToByteArrayReversed((string)dgvInputs["inTxId", i].Value), (UInt32)dgvInputs["invOut", i].Value);
 					selectedUTXO.Add(uth, UTXO[uth]);
 				}
 			}
@@ -224,11 +224,11 @@ namespace RawTxTool
 		{
 			decimal totalInput = 0;
 			decimal totalOutput = 0;
-			decimal change = 0;
+			decimal fee = 0;
 
 			List<TxIn> txin = new List<TxIn>();
 
-			foreach (KeyValuePair<UnspentTxOutHeader, TxOut> input in selectedUTXO)
+			foreach (KeyValuePair<TxOutId, TxOut> input in selectedUTXO)
 			{
 				totalInput += input.Value.value;
 				txin.Add(new TxIn(input.Key.txid, input.Key.index, new byte[0]));
@@ -241,11 +241,11 @@ namespace RawTxTool
 			}
 			totalOutput /= 100000000;
 
-			change = totalInput - totalOutput;
+			fee = totalInput - totalOutput;
 
 			lblTotalIn.Text = "Total Inputs:\n" + totalInput;
 			lblTotalOut.Text = "Total Outputs:\n" + totalOutput;
-			lblChange.Text = "Change:\n" + change;
+			lblChange.Text = "Fee:\n" + fee;
 
 			Transaction tx = new Transaction(1, txin.ToArray(), outputs.ToArray(), 0);
 			if (changeText)
@@ -277,25 +277,38 @@ namespace RawTxTool
 			if (res == DialogResult.Cancel)
 				return;
 
-			PrivateKey pk = null;
+			List<PrivateKey> keys = new List<PrivateKey>();
+
 			if (pkd.rbWIF.Checked)
-				pk = PrivateKey.FromWIF(pkd.txtKey.Text);
-			if (pkd.rbHEX.Checked)
-				pk = PrivateKey.FromHex(pkd.txtKey.Text);
+				foreach (TextBox tb in pkd.txtKeyList)
+					keys.Add(PrivateKey.FromWIF(tb.Text));
+			else if (pkd.rbHEX.Checked)
+				foreach (TextBox tb in pkd.txtKeyList)
+					keys.Add(PrivateKey.FromHex(tb.Text));
 
 			Transaction tx = new Transaction(HexString.ToByteArray(txtTx.Text));
 
 			for (int i = 0; i < tx.inputs.Length; i++)
 			{
-				TxOut prevOut = selectedUTXO[new UnspentTxOutHeader(tx.inputs[i].prevOut, tx.inputs[i].prevOutIndex)];
-				Address a = Address.FromScript(prevOut.scriptPubKey);
-				Address b = pk.pubKey.address;
-				if (a.ToString() == b.ToString())
+				foreach (PrivateKey pk in keys)
 				{
-					tx.inputs[i].Sign(tx, prevOut, pk);
+					TxOut prevOut = selectedUTXO[new TxOutId(tx.inputs[i].prevOut, tx.inputs[i].prevOutIndex)];
+					Address a = Address.FromScript(prevOut.scriptPubKey);
+					Address b;
+					Script redeemScript = null;
+					if (pkd.cbP2SH.Checked)
+					{
+						redeemScript = new Script(HexString.ToByteArray(pkd.txtRedeemScript.Text));
+						b = new Address(redeemScript.ToBytes(), Address.SCRIPT);
+					}
+					else
+					{
+						b = pk.pubKey.address;
+					}
+					if (a.ToString() == b.ToString())
+						tx.inputs[i].Sign(tx, prevOut, pk, HashType.SIGHASH_ALL, redeemScript);
 				}
 			}
-
 			txtTx.Text = HexString.FromByteArray(tx.ToBytes());
 		}
 
@@ -342,7 +355,7 @@ namespace RawTxTool
 				return;
 			using (FileStream fs = new FileStream(sfd.FileName, FileMode.OpenOrCreate, FileAccess.Write))
 			{
-				foreach (KeyValuePair<UnspentTxOutHeader, TxOut> tx in UTXO)
+				foreach (KeyValuePair<TxOutId, TxOut> tx in UTXO)
 				{
 					tx.Key.Write(fs);
 					tx.Value.Write(fs);
@@ -362,9 +375,9 @@ namespace RawTxTool
 			{
 				while (fs.Position != fs.Length)
 				{
-					UnspentTxOutHeader txh = UnspentTxOutHeader.FromStream(fs);
+					TxOutId txi = TxOutId.FromStream(fs);
 					TxOut txo = TxOut.FromStream(fs);
-					UTXO.Add(txh, txo);
+					UTXO.Add(txi, txo);
 				}
 				fs.Close();
 			}
@@ -450,7 +463,7 @@ namespace RawTxTool
 
 				foreach (TxIn txin in tx.inputs)
 				{
-					UnspentTxOutHeader txh;
+					TxOutId txi;
 					TxOut txo;
 
 					// Try local bitcoind first
@@ -460,10 +473,10 @@ namespace RawTxTool
 						{
 							string sPrevTx = rpc.doRequest<string>("getrawtransaction", new object[] { HexString.FromByteArrayReversed(txin.prevOut) });
 							Transaction prevTx = new Transaction(HexString.ToByteArray(sPrevTx));
-							txh = new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex);
+							txi = new TxOutId(txin.prevOut, txin.prevOutIndex);
 							txo = prevTx.outputs[txin.prevOutIndex];
-							UTXO.Add(txh, txo);
-							selectedUTXO.Add(txh, txo);
+							UTXO.Add(txi, txo);
+							selectedUTXO.Add(txi, txo);
 							continue;
 						}
 						catch (Exception)
@@ -484,10 +497,10 @@ namespace RawTxTool
 						Dictionary<string, object>[] outs = jss.ConvertToType<Dictionary<string, object>[]>(jso["out"]);
 						Address addr = new Address((string)outs[txin.prevOutIndex]["addr"]);
 						byte[] scriptPubKey = scriptPubKey = ScriptTemplate.PayToAddress(addr).ToBytes();
-						txh = new UnspentTxOutHeader(txin.prevOut, txin.prevOutIndex);
+						txi = new TxOutId(txin.prevOut, txin.prevOutIndex);
 						txo = new TxOut(jss.ConvertToType<UInt64>(outs[txin.prevOutIndex]["value"]), scriptPubKey);
-						UTXO.Add(txh, txo);
-						selectedUTXO.Add(txh, txo);
+						UTXO.Add(txi, txo);
+						selectedUTXO.Add(txi, txo);
 					}
 					catch (Exception)
 					{

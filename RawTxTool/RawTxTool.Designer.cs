@@ -270,7 +270,7 @@
 			this.lblChange.Name = "lblChange";
 			this.lblChange.Size = new System.Drawing.Size(126, 26);
 			this.lblChange.TabIndex = 2;
-			this.lblChange.Text = "Change:\r\n0";
+			this.lblChange.Text = "Fee:\r\n0";
 			// 
 			// txtTx
 			// 
