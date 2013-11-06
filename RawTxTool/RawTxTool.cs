@@ -237,7 +237,7 @@ namespace RawTxTool
 
 			foreach (TxOut output in outputs)
 			{
-				totalOutput = output.value;
+				totalOutput += output.value;
 			}
 			totalOutput /= 100000000;
 
@@ -245,7 +245,7 @@ namespace RawTxTool
 
 			lblTotalIn.Text = "Total Inputs:\n" + totalInput;
 			lblTotalOut.Text = "Total Outputs:\n" + totalOutput;
-			lblChange.Text = "Fee:\n" + fee;
+			lblFee.Text = "Fee:\n" + fee;
 
 			Transaction tx = new Transaction(1, txin.ToArray(), outputs.ToArray(), 0);
 			if (changeText)

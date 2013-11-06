@@ -49,7 +49,7 @@
 			this.outAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.outAmount = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.lblTotalOut = new System.Windows.Forms.Label();
-			this.lblChange = new System.Windows.Forms.Label();
+			this.lblFee = new System.Windows.Forms.Label();
 			this.txtTx = new System.Windows.Forms.TextBox();
 			this.btnSignBitcoind = new System.Windows.Forms.Button();
 			this.btnSignPrivkey = new System.Windows.Forms.Button();
@@ -263,14 +263,14 @@
 			this.lblTotalOut.TabIndex = 1;
 			this.lblTotalOut.Text = "Total Outputs:\r\n0";
 			// 
-			// lblChange
+			// lblFee
 			// 
-			this.lblChange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.lblChange.Location = new System.Drawing.Point(3, 52);
-			this.lblChange.Name = "lblChange";
-			this.lblChange.Size = new System.Drawing.Size(126, 26);
-			this.lblChange.TabIndex = 2;
-			this.lblChange.Text = "Fee:\r\n0";
+			this.lblFee.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.lblFee.Location = new System.Drawing.Point(3, 52);
+			this.lblFee.Name = "lblFee";
+			this.lblFee.Size = new System.Drawing.Size(126, 26);
+			this.lblFee.TabIndex = 2;
+			this.lblFee.Text = "Fee:\r\n0";
 			// 
 			// txtTx
 			// 
@@ -399,7 +399,7 @@
 			// 
 			this.flowLayoutPanel1.Controls.Add(this.lblTotalIn);
 			this.flowLayoutPanel1.Controls.Add(this.lblTotalOut);
-			this.flowLayoutPanel1.Controls.Add(this.lblChange);
+			this.flowLayoutPanel1.Controls.Add(this.lblFee);
 			this.flowLayoutPanel1.Controls.Add(this.btnSignBitcoind);
 			this.flowLayoutPanel1.Controls.Add(this.btnSignPrivkey);
 			this.flowLayoutPanel1.Controls.Add(this.btnSendBitcoind);
@@ -462,7 +462,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn outAddress;
 		private System.Windows.Forms.DataGridViewTextBoxColumn outAmount;
 		private System.Windows.Forms.Label lblTotalOut;
-		private System.Windows.Forms.Label lblChange;
+		private System.Windows.Forms.Label lblFee;
 		private System.Windows.Forms.TextBox txtTx;
 		private System.Windows.Forms.Button btnSignBitcoind;
 		private System.Windows.Forms.Button btnSignPrivkey;
